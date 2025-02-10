@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FirebaseAdmin" Version="3.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" NoWarn="NU1605" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.2" NoWarn="NU1605" />
         <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
@@ -23,8 +24,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Api\" />
-      <Folder Include="Core\" />
       <Folder Include="Properties\Domain\" />
     </ItemGroup>
 
