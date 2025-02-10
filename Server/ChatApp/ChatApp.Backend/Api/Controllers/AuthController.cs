@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using ChatApp.Backend.Core.Authentication;
 using ChatApp.Backend.Core.Users;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +27,7 @@ public class AuthController : ControllerBase
         if (!result.IsSuccess)
             return StatusCode(result.StatusCode, new { error = result.ErrorMessage! });
 
-        var userId = result.Data!;
+        var userId = result.Data!.Uid;
         var isNew = await _userService.IsNewUser(userId);
         return Ok(new { userId, isNew });
     }
@@ -39,11 +40,14 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var result = await _userService.CreateUserAsync(form.Email, form.DisplayName);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+        var result = await _userService.CreateUserAsync(userId, email, form.DisplayName);
         return result.IsSuccess
             ? Ok(new { userId = result.Data! })
             : StatusCode(result.StatusCode, new { error = result.ErrorMessage! });
     }
 }
 
-public record RegisterForm([Required] [EmailAddress] string Email, [Required] string DisplayName);
+public record RegisterForm([Required] string DisplayName);

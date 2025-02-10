@@ -1,6 +1,9 @@
-﻿using ChatApp.Backend.Core.Common;
+﻿using System.ComponentModel.DataAnnotations;
+using ChatApp.Backend.Api.Controllers;
+using ChatApp.Backend.Core.Common;
 using ChatApp.Backend.Domain;
 using ChatApp.Backend.Infrastructure.Data;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +14,13 @@ namespace ChatApp.Backend.Core.Users;
 public class UserService : IUserService
 {
     private readonly ChatDbContext _dbContext;
+    private readonly IValidator<RegisterData> _validator;
     private const int MaxNameLength = 25;
 
-    public UserService(ChatDbContext dbContext)
+    public UserService(ChatDbContext dbContext, IValidator<RegisterData> validator)
     {
         _dbContext = dbContext;
+        _validator = validator;
     }
 
     public async Task<bool> IsNewUser(string userId)
@@ -24,28 +29,32 @@ public class UserService : IUserService
         return !userExists;
     }
 
-    public async Task<Result<string>> CreateUserAsync(string email, string displayName)
+    public async Task<Result<string>> CreateUserAsync(
+        string? userId,
+        string? email,
+        string? displayName
+    )
     {
-        if (email.IsNullOrEmpty())
-        {
-            return Result<string>.Failure(errorMessage: "Email is empty or null");
-        }
+        var registerData = new RegisterData(userId, email, displayName);
+        var validationResult = await _validator.ValidateAsync(registerData);
 
-        if (displayName.IsNullOrEmpty())
+        if (!validationResult.IsValid)
         {
-            return Result<string>.Failure(errorMessage: "Display name is empty or null");
-        }
-
-        if (displayName.Length > MaxNameLength)
-        {
-            return Result<string>.Failure(
-                errorMessage: "Display name has length over the limit (25)"
+            var errorMessages = string.Join(
+                ", ",
+                validationResult.Errors.Select(e => e.ErrorMessage)
             );
+            return Result<string>.Failure(errorMessage: errorMessages);
         }
 
         try
         {
-            var newUser = new User { Email = email, DisplayName = displayName };
+            var newUser = new User
+            {
+                Id = userId!,
+                Email = email!,
+                DisplayName = displayName!,
+            };
             await _dbContext.Users.AddAsync(newUser);
             await _dbContext.SaveChangesAsync();
             return Result<string>.Success(newUser.Id);
@@ -54,9 +63,14 @@ public class UserService : IUserService
         {
             if (ex.InnerException is SqlException { Number: 2627 or 2601 })
             {
-                return Result<string>.Failure(
-                    errorMessage: "An account with this email already exists"
-                );
+                if (ex.Message.Contains("IX_UNIQUE_EMAIL"))
+                {
+                    return Result<string>.Failure("An account with this email already exists");
+                }
+                if (ex.Message.Contains("IX_UNIQUE_NAME"))
+                {
+                    return Result<string>.Failure("Display name is already taken");
+                }
             }
             return Result<string>.Failure(
                 errorMessage: $"A database error occurred: {ex.Message}",

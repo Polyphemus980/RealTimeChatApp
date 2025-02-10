@@ -7,11 +7,11 @@ namespace ChatApp.Backend.Core.Services;
 
 public class AuthService : IAuthService
 {
-    public async Task<Result<string>> VerifyTokenAsync(string token)
+    public async Task<Result<FirebaseToken>> VerifyTokenAsync(string? token)
     {
         if (token.IsNullOrEmpty())
         {
-            return Result<string>.Failure(errorMessage: "Token is missing");
+            return Result<FirebaseToken>.Failure(errorMessage: "Token is missing");
         }
 
         try
@@ -19,11 +19,11 @@ public class AuthService : IAuthService
             FirebaseToken verifiedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(
                 token
             );
-            return Result<string>.Success(verifiedToken.Uid);
+            return Result<FirebaseToken>.Success(verifiedToken);
         }
         catch (FirebaseAuthException ex)
         {
-            return Result<string>.Failure(
+            return Result<FirebaseToken>.Failure(
                 errorMessage: ex.Message,
                 statusCode: StatusCodes.Status401Unauthorized
             );

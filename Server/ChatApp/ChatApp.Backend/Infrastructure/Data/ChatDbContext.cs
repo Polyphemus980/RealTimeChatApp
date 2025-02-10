@@ -13,9 +13,19 @@ public class ChatDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<User>().Property(u => u.Email).IsRequired();
-        modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+        modelBuilder
+            .Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique()
+            .HasDatabaseName("IX_UNIQUE_EMAIL");
 
         modelBuilder.Entity<User>().Property(u => u.DisplayName).IsRequired().HasMaxLength(25);
+        modelBuilder
+            .Entity<User>()
+            .HasIndex(u => u.DisplayName)
+            .IsUnique()
+            .HasDatabaseName("IX_UNIQUE_NAME");
     }
 }
