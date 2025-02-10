@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using ChatApp.Backend.Core.Authentication;
-using ChatApp.Backend.Core.Services.Interfaces;
 using ChatApp.Backend.Core.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -24,10 +23,12 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> VerifyToken([FromBody] string token)
     {
         var result = await _authService.VerifyTokenAsync(token);
-        if (!result.IsValid)
-            return Unauthorized(new { error = result.ErrorMessage! });
-        var isNew = await _userService.IsNewUser(result.UserId!);
-        return Ok(new { userId = result.UserId, isNew });
+        if (!result.IsSuccess)
+            return StatusCode(result.StatusCode, new { error = result.ErrorMessage! });
+
+        var userId = result.Data!;
+        var isNew = await _userService.IsNewUser(userId);
+        return Ok(new { userId, isNew });
     }
 
     [HttpPost("register")]
@@ -38,9 +39,9 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var result = await _userService.CreateUser(form.Email, form.DisplayName);
-        return result.IsValid
-            ? Ok(new { userId = result.UserId })
+        var result = await _userService.CreateUserAsync(form.Email, form.DisplayName);
+        return result.IsSuccess
+            ? Ok(new { userId = result.Data! })
             : StatusCode(result.StatusCode, new { error = result.ErrorMessage! });
     }
 }

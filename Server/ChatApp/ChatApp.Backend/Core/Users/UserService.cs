@@ -1,4 +1,5 @@
-﻿using ChatApp.Backend.Domain;
+﻿using ChatApp.Backend.Core.Common;
+using ChatApp.Backend.Domain;
 using ChatApp.Backend.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Data.SqlClient;
@@ -23,64 +24,50 @@ public class UserService : IUserService
         return !userExists;
     }
 
-    public async Task<UserResult> CreateUser(string email, string displayName)
+    public async Task<Result<string>> CreateUserAsync(string email, string displayName)
     {
         if (email.IsNullOrEmpty())
         {
-            return new UserResult(
-                IsValid: false,
-                ErrorMessage: "Email is empty or null",
-                StatusCode: StatusCodes.Status400BadRequest
-            );
+            return Result<string>.Failure(errorMessage: "Email is empty or null");
         }
 
         if (displayName.IsNullOrEmpty())
         {
-            return new UserResult(
-                IsValid: false,
-                ErrorMessage: "Display name is empty or null",
-                StatusCode: StatusCodes.Status400BadRequest
-            );
+            return Result<string>.Failure(errorMessage: "Display name is empty or null");
         }
 
         if (displayName.Length > MaxNameLength)
         {
-            return new UserResult(
-                IsValid: false,
-                ErrorMessage: "Display name has length over the limit (25)",
-                StatusCode: StatusCodes.Status400BadRequest
+            return Result<string>.Failure(
+                errorMessage: "Display name has length over the limit (25)"
             );
         }
 
         try
         {
-            var newUser = new User() { Email = email, DisplayName = displayName };
+            var newUser = new User { Email = email, DisplayName = displayName };
             await _dbContext.Users.AddAsync(newUser);
             await _dbContext.SaveChangesAsync();
-            return new UserResult(IsValid: true, UserId: newUser.Id);
+            return Result<string>.Success(newUser.Id);
         }
         catch (DbUpdateException ex)
         {
             if (ex.InnerException is SqlException { Number: 2627 or 2601 })
             {
-                return new UserResult(
-                    false,
-                    ErrorMessage: "Email is already in use",
-                    StatusCode: 400
+                return Result<string>.Failure(
+                    errorMessage: "An account with this email already exists"
                 );
             }
-            return new UserResult(
-                false,
-                ErrorMessage: $"A database error occurred: {ex.Message}",
-                StatusCode: 500
+            return Result<string>.Failure(
+                errorMessage: $"A database error occurred: {ex.Message}",
+                statusCode: 500
             );
         }
         catch (Exception ex)
         {
-            return new UserResult(
-                IsValid: false,
-                ErrorMessage: $"Unexpected error occured while creating a user: {ex.Message})",
-                StatusCode: 500
+            return Result<string>.Failure(
+                errorMessage: $"Unexpected error occured while creating a user: {ex.Message})",
+                statusCode: 500
             );
         }
     }

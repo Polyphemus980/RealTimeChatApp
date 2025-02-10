@@ -1,10 +1,8 @@
-﻿using ChatApp.Backend.Core.Authentication;
-using ChatApp.Backend.Domain;
-using FirebaseAdmin.Auth;
+﻿using ChatApp.Backend.Core.Common;
 
-namespace ChatApp.Backend.Core.Services.Interfaces;
+namespace ChatApp.Backend.Core.Authentication;
 
 public interface IAuthService
 {
-    public Task<AuthResult> VerifyTokenAsync(string token);
+    public Task<Result<string>> VerifyTokenAsync(string token);
 }
