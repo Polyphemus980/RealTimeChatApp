@@ -9,6 +9,7 @@ public class ChatDbContext : DbContext
     public DbSet<Message> Messages { get; set; }
     public DbSet<Group> Groups { get; set; }
     public DbSet<GroupUsers> GroupUsers { get; set; }
+    public DbSet<MessageReceivers> MessageReceivers { get; set; }
 
     public ChatDbContext(DbContextOptions<ChatDbContext> options)
         : base(options) { }
@@ -31,19 +32,17 @@ public class ChatDbContext : DbContext
             .HasDatabaseName("IX_UNIQUE_NAME");
 
         modelBuilder
+            .Entity<User>()
+            .HasMany(u => u.Groups)
+            .WithMany(g => g.Users)
+            .UsingEntity<GroupUsers>();
+
+        modelBuilder
             .Entity<Message>()
             .HasOne(m => m.Sender)
             .WithMany(u => u.SentMessages)
             .HasForeignKey(m => m.SenderId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder
-            .Entity<Message>()
-            .HasOne(m => m.ReceiverUser)
-            .WithMany(u => u.ReceivedMessages)
-            .HasForeignKey(m => m.ReceiverUserId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired(false);
 
         modelBuilder
             .Entity<Message>()
@@ -53,20 +52,12 @@ public class ChatDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
 
-        modelBuilder
-            .Entity<Message>()
-            .ToTable(messageTable =>
-                messageTable.HasCheckConstraint(
-                    "CK_MESSAGE_RECEIVER",
-                    "(ReceiverUserId IS NOT NULL AND ReceiverGroupId IS NULL) OR "
-                        + "(ReceiverUserId IS NULL AND ReceiverGroupId IS NOT NULL)"
-                )
-            );
+        modelBuilder.Entity<MessageReceivers>().HasKey(mr => new { mr.MessageId, mr.UserId });
 
         modelBuilder
-            .Entity<User>()
-            .HasMany(u => u.Groups)
-            .WithMany(g => g.Users)
-            .UsingEntity<GroupUsers>();
+            .Entity<Message>()
+            .HasMany(m => m.UserReceivers)
+            .WithMany(u => u.ReceivedMessages)
+            .UsingEntity<MessageReceivers>();
     }
 }

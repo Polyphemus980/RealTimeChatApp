@@ -1,13 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ChatApp.Backend.Core.Enums;
 
 namespace ChatApp.Backend.Domain;
-
-public enum MessageStatus
-{
-    Sent,
-    Delivered,
-    Read,
-}
 
 public class Message
 {
@@ -19,13 +13,13 @@ public class Message
     public Group? ReceiverGroup { get; set; }
     public int? ReceiverGroupId { get; set; }
 
-    public User? ReceiverUser { get; set; }
-    public string? ReceiverUserId { get; set; }
-
     public DateTime CreatedAt { get; set; }
-    public MessageStatus Status { get; set; }
 
     // For now only text content
     [Required]
     public string Content { get; set; }
+
+    public List<MessageReceivers> MessageStatuses { get; } = [];
+
+    public List<User> UserReceivers { get; } = [];
 }

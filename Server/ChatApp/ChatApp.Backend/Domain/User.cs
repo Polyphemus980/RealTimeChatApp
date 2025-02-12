@@ -21,4 +21,6 @@ public class User
     public List<GroupUsers> GroupUsers { get; } = [];
 
     public List<Group> Groups { get; } = [];
+
+    public List<MessageReceivers> MessageStatuses { get; } = [];
 }

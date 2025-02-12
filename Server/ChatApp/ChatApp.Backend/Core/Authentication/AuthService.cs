@@ -10,13 +10,14 @@ public class AuthService : IAuthService
     {
         if (token.IsNullOrEmpty())
         {
-            return Result<FirebaseToken>.Failure(errorMessage: "Token is missing");
+            return Result<FirebaseToken>.Failure(
+                errorMessage: "Token is missing",
+                statusCode: StatusCodes.Status401Unauthorized
+            );
         }
         try
         {
-            FirebaseToken verifiedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(
-                token
-            );
+            var verifiedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
             return Result<FirebaseToken>.Success(verifiedToken);
         }
         catch (FirebaseAuthException ex)

@@ -1,4 +1,5 @@
 using ChatApp.Backend.Api.Middleware;
+using ChatApp.Backend.Core.Authentication;
 using ChatApp.Backend.Core.Users;
 using ChatApp.Backend.Infrastructure.Data;
 using FirebaseAdmin;
@@ -11,16 +12,12 @@ using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder
-    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
-// FirebaseApp.Create(
-//     new AppOptions()
-//     {
-//         Credential = GoogleCredential.FromFile("path-to-your-service-account-file.json"),
-//     }
-// );
+FirebaseApp.Create(
+    new AppOptions()
+    {
+        Credential = GoogleCredential.FromFile("config/firebase-service-account.json"),
+    }
+);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ChatDbContext>(options =>
@@ -29,11 +26,12 @@ builder.Services.AddDbContext<ChatDbContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddAuthorization();
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddTransient<IValidator<RegisterData>, UserValidator>();
-builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
+builder.Services.AddTransient<IAuthService, AuthService>();
 
+builder.Services.AddAuthorization();
 builder.Services.AddSignalR();
 var app = builder.Build();
 

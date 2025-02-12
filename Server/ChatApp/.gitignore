@@ -3,3 +3,4 @@ ChatApp.Backend/bin/*
 ChatApp.Backend/obj/*
 ChatApp.Backend/appsettings.json
 ChatApp.Backend/appsettings.Development.json
+ChatApp.Backend/config/firebase-service-account.json
