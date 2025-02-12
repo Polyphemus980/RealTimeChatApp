@@ -1,9 +1,8 @@
-﻿using ChatApp.Backend.Core.Authentication;
-using ChatApp.Backend.Core.Common;
+﻿using ChatApp.Backend.Core.Common;
 using FirebaseAdmin.Auth;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ChatApp.Backend.Core.Services;
+namespace ChatApp.Backend.Core.Authentication;
 
 public class AuthService : IAuthService
 {
@@ -13,7 +12,6 @@ public class AuthService : IAuthService
         {
             return Result<FirebaseToken>.Failure(errorMessage: "Token is missing");
         }
-
         try
         {
             FirebaseToken verifiedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(

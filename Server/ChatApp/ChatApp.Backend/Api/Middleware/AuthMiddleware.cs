@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
-using Azure.Core;
 using ChatApp.Backend.Core.Authentication;
-using Microsoft.IdentityModel.Tokens;
+using ChatApp.Backend.Domain;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ChatApp.Backend.Api.Middleware;
 
@@ -28,6 +28,7 @@ public class AuthMiddleware
 
         var authHeader = context.Request.Headers.Authorization;
         var token = authHeader.FirstOrDefault()?.Replace("Bearer ", "");
+
         var result = await _authService.VerifyTokenAsync(token);
         if (!result.IsSuccess)
         {
@@ -44,8 +45,8 @@ public class AuthMiddleware
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, uid),
-            new Claim(ClaimTypes.Email, email ?? string.Empty),
+            new(ClaimTypes.NameIdentifier, uid),
+            new(ClaimTypes.Email, email ?? string.Empty),
         };
 
         var identity = new ClaimsIdentity(claims, "firebase");

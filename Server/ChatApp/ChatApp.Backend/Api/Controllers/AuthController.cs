@@ -2,11 +2,13 @@
 using System.Security.Claims;
 using ChatApp.Backend.Core.Authentication;
 using ChatApp.Backend.Core.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace ChatApp.Backend.Api.Controllers;
 
+[Authorize]
 [Route("auth")]
 [ApiController]
 public class AuthController : ControllerBase
@@ -20,6 +22,7 @@ public class AuthController : ControllerBase
         _userService = userService;
     }
 
+    [AllowAnonymous]
     [HttpPost("verify")]
     public async Task<IActionResult> VerifyToken([FromBody] string token)
     {
