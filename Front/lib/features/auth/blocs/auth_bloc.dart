@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:chatapp_frontend/api_service.dart';
+import 'package:chatapp_frontend/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -44,6 +46,12 @@ class SignedIn extends AuthState {
   final String token;
 }
 
+class SignedInNeedData extends AuthState {
+  SignedInNeedData({required this.user, required this.token});
+  final User user;
+  final String token;
+}
+
 class PendingEmailVerification extends AuthState {
   PendingEmailVerification({required this.user});
   final User user;
@@ -55,8 +63,11 @@ class AuthError extends AuthState {
 }
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc({required FirebaseAuth authInstance})
-      : _authInstance = authInstance,
+  AuthBloc({
+    required FirebaseAuth authInstance,
+    required UserApiService userApiService,
+  })  : _authInstance = authInstance,
+        _userApiService = userApiService,
         super(SignedOut()) {
     _handleAuthStateChanges();
     on<AuthStateChanged>(_handleStateChanged);
@@ -67,6 +78,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignOut>(_signOut);
   }
   final FirebaseAuth _authInstance;
+  final UserApiService _userApiService;
   StreamSubscription<User?>? _authStateSubscription;
 
   void _handleAuthStateChanges() {
@@ -142,7 +154,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await _authInstance.signOut();
   }
 
-  void _handleStateChanged(AuthStateChanged event, Emitter<AuthState> emit) {
+  Future<void> _handleStateChanged(
+    AuthStateChanged event,
+    Emitter<AuthState> emit,
+  ) async {
     if (state is SignedIn && event.user != null) {
       return;
     }
@@ -151,7 +166,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(PendingEmailVerification(user: event.user!));
         return;
       }
-      emit(SignedIn(user: event.user!, token: event.token!));
+      final result = await _userApiService.verifyTokenAndCheckIfNewUser();
+      if (result.isSuccess) {
+        ApiService().updateToken(event.token);
+        final isNewUser = result.data!;
+        !isNewUser
+            ? emit(SignedIn(user: event.user!, token: event.token!))
+            : emit(
+                SignedInNeedData(user: event.user!, token: event.token!),
+              );
+      } else {
+        emit(AuthError(message: result.errorMessage!));
+      }
+      return;
     }
     emit(SignedOut());
   }

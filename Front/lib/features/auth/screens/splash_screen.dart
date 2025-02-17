@@ -12,7 +12,11 @@ class SplashScreen extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is SignedIn) {
-          context.go('/register');
+          context.go('/signout');
+          return;
+        }
+        if (state is SignedInNeedData) {
+          context.go('/data');
           return;
         }
         if (state is PendingEmailVerification) {

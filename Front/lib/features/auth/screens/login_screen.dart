@@ -10,10 +10,12 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
+    return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is SignedIn) {
-          context.push('/register');
+          context.go('/signout');
+        } else if (state is SignedInNeedData) {
+          context.go('/data');
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -23,9 +25,7 @@ class LoginScreen extends StatelessWidget {
           );
         }
       },
-      builder: (context, state) {
-        return const LoginForm();
-      },
+      child: const LoginForm(),
     );
   }
 }
