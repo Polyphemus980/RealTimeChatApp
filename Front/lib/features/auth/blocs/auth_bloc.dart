@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:chatapp_frontend/api_service.dart';
-import 'package:chatapp_frontend/user_service.dart';
+import 'package:chatapp_frontend/user_api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -158,6 +157,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthStateChanged event,
     Emitter<AuthState> emit,
   ) async {
+    _userApiService.updateToken(event.token);
     if (state is SignedIn && event.user != null) {
       return;
     }
@@ -166,9 +166,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(PendingEmailVerification(user: event.user!));
         return;
       }
-      final result = await _userApiService.verifyTokenAndCheckIfNewUser();
+      final result = await _userApiService.checkIfNewUser();
       if (result.isSuccess) {
-        ApiService().updateToken(event.token);
         final isNewUser = result.data!;
         !isNewUser
             ? emit(SignedIn(user: event.user!, token: event.token!))
@@ -176,7 +175,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 SignedInNeedData(user: event.user!, token: event.token!),
               );
       } else {
-        emit(AuthError(message: result.errorMessage!));
+        emit(AuthError(message: 'Could not verify user'));
       }
       return;
     }

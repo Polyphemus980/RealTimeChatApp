@@ -18,14 +18,6 @@ public class AuthMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        var path = context.Request.Path.Value?.ToLower();
-
-        if (path == "/auth/verify")
-        {
-            await _next(context);
-            return;
-        }
-
         var authHeader = context.Request.Headers.Authorization;
         var token = authHeader.FirstOrDefault()?.Replace("Bearer ", "");
 

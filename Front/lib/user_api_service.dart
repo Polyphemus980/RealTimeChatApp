@@ -2,12 +2,17 @@ import 'package:chatapp_frontend/api_service.dart';
 import 'package:chatapp_frontend/core/result_type/result.dart';
 
 class UserApiService {
-  UserApiService({required this.apiService});
-  final ApiService apiService;
+  UserApiService({required ApiService apiService}) : _apiService = apiService;
+  final ApiService _apiService;
 
   Future<Result<bool>> checkIfNameFree(String name) async {
+    final requestUri = Uri.parse('user/check-name').replace(
+      queryParameters: {
+        'name': name,
+      },
+    );
     final result =
-        await apiService.get<Map<String, dynamic>>('user/check-name');
+        await _apiService.get<Map<String, dynamic>>(requestUri.toString());
     if (!result.isSuccess) {
       return Result<bool>.failure(result.errorMessage!);
     }
@@ -23,8 +28,9 @@ class UserApiService {
     }
   }
 
-  Future<Result<bool>> verifyTokenAndCheckIfNewUser() async {
-    final result = await apiService.get<Map<String, dynamic>>('auth/verify');
+  Future<Result<bool>> checkIfNewUser() async {
+    final result =
+        await _apiService.get<Map<String, dynamic>>('user/check-new');
     if (!result.isSuccess) {
       return Result<bool>.failure(result.errorMessage!);
     }
@@ -38,5 +44,9 @@ class UserApiService {
     } catch (err) {
       return Result<bool>.failure('Error processing response: $err');
     }
+  }
+
+  void updateToken(String? token) {
+    _apiService.updateToken(token);
   }
 }

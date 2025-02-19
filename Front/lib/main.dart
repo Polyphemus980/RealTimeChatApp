@@ -1,4 +1,5 @@
 import 'package:chatapp_frontend/features/theme/theme_notifier.dart';
+import 'package:chatapp_frontend/get_it_di.dart';
 import 'package:chatapp_frontend/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  getItSetUp();
   runApp(
     const GlobalProviders(
       child: MyApp(),

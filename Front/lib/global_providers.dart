@@ -1,6 +1,6 @@
 import 'package:chatapp_frontend/features/auth/blocs/auth_bloc.dart';
 import 'package:chatapp_frontend/features/theme/theme_notifier.dart';
-import 'package:chatapp_frontend/user_service.dart';
+import 'package:chatapp_frontend/user_api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

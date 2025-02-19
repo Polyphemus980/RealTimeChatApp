@@ -2,7 +2,7 @@ import 'package:chatapp_frontend/core/common_widgets/app_scaffold.dart';
 import 'package:chatapp_frontend/core/common_widgets/app_text_form_field.dart';
 import 'package:chatapp_frontend/features/auth/blocs/auth_bloc.dart';
 import 'package:chatapp_frontend/set_name_bloc.dart';
-import 'package:chatapp_frontend/user_service.dart';
+import 'package:chatapp_frontend/user_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -40,15 +40,27 @@ class SetNameForm extends HookWidget {
           children: [
             Form(
               key: formKey.value,
-              child: AppTextFormField(
-                controller: textController,
-                width: double.infinity,
-                labelText: 'Name',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Name must not be empty';
-                  }
-                  return null;
+              child: BlocBuilder<SetNameBloc, SetNameState>(
+                builder: (context, state) {
+                  return AppTextFormField(
+                    controller: textController,
+                    width: double.infinity,
+                    labelText: 'Name',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Name must not be empty';
+                      }
+                      return null;
+                    },
+                    errorText: (state is NameTaken)
+                        ? '${textController.text} is taken'
+                        : null,
+                    onChanged: (value) {
+                      context.read<SetNameBloc>().add(
+                            NameChanged(newName: value),
+                          );
+                    },
+                  );
                 },
               ),
             ),

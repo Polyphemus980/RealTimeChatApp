@@ -12,12 +12,12 @@ class ApiService {
     )..interceptors.add(_authInterceptor);
   }
 
-  late Dio _dio;
+  late final Dio _dio;
   String? _token;
 
   InterceptorsWrapper get _authInterceptor => InterceptorsWrapper(
         onRequest: (options, handler) {
-          if (options.path != 'auth/verify' && _token != null) {
+          if (_token != null) {
             options.headers['Authorization'] = 'Bearer $_token';
           }
           if (options.data != null) {
