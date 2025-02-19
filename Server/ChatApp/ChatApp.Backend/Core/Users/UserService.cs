@@ -23,10 +23,36 @@ public class UserService : IUserService
         _validator = validator;
     }
 
-    public async Task<bool> IsNewUser(string userId)
+    public async Task<Result<bool>> IsNewUser(string? userId)
     {
-        var userExists = await _dbContext.Users.AnyAsync(u => u.Id.Equals(userId));
-        return !userExists;
+        if (userId.IsNullOrEmpty())
+        {
+            return Result<bool>.Failure("User ID must not be empty");
+        }
+        try
+        {
+            var userExists = await _dbContext.Users.AnyAsync(u => u.Id.Equals(userId));
+            return Result<bool>.Success(!userExists);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure(ex.Message);
+        }
+    }
+
+    public async Task<Result<bool>> IsNameFree(string name)
+    {
+        try
+        {
+            var userWithNameExists = await _dbContext.Users.AnyAsync(u =>
+                u.DisplayName.Equals(name)
+            );
+            return Result<bool>.Success(!userWithNameExists);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure(ex.Message);
+        }
     }
 
     public async Task<Result<string>> CreateUserAsync(

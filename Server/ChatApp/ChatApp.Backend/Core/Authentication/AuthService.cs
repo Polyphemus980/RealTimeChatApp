@@ -22,6 +22,7 @@ public class AuthService : IAuthService
         }
         catch (FirebaseAuthException ex)
         {
+            Console.WriteLine(ex.Message);
             return Result<FirebaseToken>.Failure(
                 errorMessage: ex.Message,
                 statusCode: StatusCodes.Status401Unauthorized

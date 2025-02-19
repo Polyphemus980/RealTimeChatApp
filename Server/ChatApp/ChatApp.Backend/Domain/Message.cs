@@ -7,8 +7,8 @@ public class Message
 {
     public int Id { get; set; }
 
-    public User Sender { get; set; }
-    public string SenderId { get; set; }
+    public User Sender { get; set; } = null!;
+    public string SenderId { get; set; } = null!;
 
     public Group? ReceiverGroup { get; set; }
     public int? ReceiverGroupId { get; set; }
@@ -17,7 +17,7 @@ public class Message
 
     // For now only text content
     [Required]
-    public string Content { get; set; }
+    public string Content { get; set; } = null!;
 
     public List<MessageReceivers> MessageStatuses { get; } = [];
 

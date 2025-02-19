@@ -22,19 +22,6 @@ public class AuthController : ControllerBase
         _userService = userService;
     }
 
-    [AllowAnonymous]
-    [HttpPost("verify")]
-    public async Task<IActionResult> VerifyToken([FromBody] string token)
-    {
-        var result = await _authService.VerifyTokenAsync(token);
-        if (!result.IsSuccess)
-            return StatusCode(result.StatusCode, new { error = result.ErrorMessage! });
-
-        var userId = result.Data!.Uid;
-        var isNew = await _userService.IsNewUser(userId);
-        return Ok(new { userId, isNew });
-    }
-
     [HttpPost("register")]
     public async Task<IActionResult> RegisterUser([FromForm] RegisterForm form)
     {

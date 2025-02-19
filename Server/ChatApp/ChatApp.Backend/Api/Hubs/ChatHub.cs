@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace ChatApp.Backend.Api.Hubs;
 
 [Authorize]
-public class ChatHub : Hub
+public class ChatHub : Hub<IChatHub>
 {
     private readonly IConnectionManager _connectionManager;
 
@@ -23,4 +23,11 @@ public class ChatHub : Hub
         _connectionManager.AddConnection(userId, Context.ConnectionId);
         return Task.CompletedTask;
     }
+}
+
+public interface IChatHub
+{
+    public Task SendMessage();
+
+    public Task SendTwoMessages();
 }
