@@ -143,8 +143,8 @@ public class MessageService : IMessageService
         if (messageIds.Count == 0)
         {
             return Result<List<int>>.Failure(
-                $"No delivered messages found for the sender with id: ${senderId} "
-                    + $"and receiver with id: ${userReceiverId}."
+                $"No delivered messages found for the sender with id: {senderId} "
+                    + $"and receiver with id: {userReceiverId}."
             );
         }
 

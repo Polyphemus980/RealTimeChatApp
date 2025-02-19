@@ -1,14 +1,14 @@
+using ChatApp.Backend.Api.Hubs;
 using ChatApp.Backend.Api.Middleware;
 using ChatApp.Backend.Core.Authentication;
+using ChatApp.Backend.Core.Groups;
+using ChatApp.Backend.Core.Messages;
 using ChatApp.Backend.Core.Users;
 using ChatApp.Backend.Infrastructure.Data;
 using FirebaseAdmin;
 using FluentValidation;
 using Google.Apis.Auth.OAuth2;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,9 +28,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddTransient<IValidator<RegisterData>, UserValidator>();
 builder.Services.AddTransient<IAuthService, AuthService>();
-
 builder.Services.AddAuthorization();
 builder.Services.AddSignalR();
 var app = builder.Build();
@@ -44,7 +45,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseMiddleware<AuthMiddleware>();
 app.UseAuthorization();
-
+app.MapHub<ChatHub>("/chat");
 app.MapControllers();
 
 app.Run();

@@ -37,6 +37,8 @@ public class ChatDbContext : DbContext
             .WithMany(g => g.Users)
             .UsingEntity<GroupUsers>();
 
+        modelBuilder.Entity<GroupUsers>().Property(g => g.Nickname).HasMaxLength(25);
+
         modelBuilder
             .Entity<Message>()
             .HasOne(m => m.Sender)

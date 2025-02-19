@@ -10,8 +10,7 @@ public class GroupUsers
     public int GroupId { get; set; }
     public Group Group { get; set; } = null!;
 
-    [Required]
-    public string Nickname { get; set; } = null!;
+    public string? Nickname { get; set; }
 
     public bool IsAdmin { get; set; }
 }
