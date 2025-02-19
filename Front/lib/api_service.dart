@@ -37,7 +37,8 @@ class ApiService {
     try {
       final response = await _dio.get<T>(endpoint);
 
-      if (response.statusCode == 200) {
+      final statusCode = response.statusCode;
+      if (statusCode != null && statusCode >= 200 && statusCode <= 299) {
         if (response.data is T) {
           return Result<T>.success(response.data as T);
         } else {
@@ -57,7 +58,8 @@ class ApiService {
     try {
       final response = await _dio.post<T>(endpoint, data: data);
 
-      if (response.statusCode == 200) {
+      final statusCode = response.statusCode;
+      if (statusCode != null && statusCode >= 200 && statusCode <= 299) {
         if (response.data is T) {
           return Result<T>.success(response.data as T);
         } else {

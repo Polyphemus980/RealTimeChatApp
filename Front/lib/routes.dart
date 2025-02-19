@@ -1,6 +1,7 @@
 import 'package:chatapp_frontend/features/auth/screens/login_screen.dart';
 import 'package:chatapp_frontend/features/auth/screens/sign_up_screen.dart';
 import 'package:chatapp_frontend/features/auth/screens/splash_screen.dart';
+import 'package:chatapp_frontend/home_screen.dart';
 import 'package:chatapp_frontend/set_name_screen.dart';
 import 'package:chatapp_frontend/sign_out_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +28,10 @@ final router = GoRouter(
     GoRoute(
       path: '/data',
       builder: (context, state) => const SetNameScreen(),
+    ),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => const HomeScreen(),
     ),
   ],
 );

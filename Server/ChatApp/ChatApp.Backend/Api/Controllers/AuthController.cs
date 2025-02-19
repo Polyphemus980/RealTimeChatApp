@@ -23,7 +23,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> RegisterUser([FromForm] RegisterForm form)
+    public async Task<IActionResult> RegisterUser([FromBody] RegisterForm form)
     {
         if (!ModelState.IsValid)
         {
@@ -35,9 +35,9 @@ public class AuthController : ControllerBase
 
         var result = await _userService.CreateUserAsync(userId, email, form.DisplayName);
         return result.IsSuccess
-            ? Ok(new { userId = result.Data! })
+            ? Created()
             : StatusCode(result.StatusCode, new { error = result.ErrorMessage! });
     }
 }
 
-public record RegisterForm([Required] string DisplayName);
+public record RegisterForm([Required] string DisplayName = null!);

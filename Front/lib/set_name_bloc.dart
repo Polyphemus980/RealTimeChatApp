@@ -10,6 +10,11 @@ class NameChanged extends SetNameEvent {
   final String newName;
 }
 
+class FinishedRegistering extends SetNameEvent {
+  FinishedRegistering({required this.newName});
+  final String newName;
+}
+
 sealed class SetNameState {}
 
 class NoData extends SetNameState {}
@@ -17,6 +22,16 @@ class NoData extends SetNameState {}
 class NameTaken extends SetNameState {}
 
 class NameFree extends SetNameState {}
+
+class UserCreated extends SetNameState {}
+
+class RegisterError extends SetNameState {
+  RegisterError({required this.errorMessage});
+
+  final String errorMessage;
+}
+
+class RegisterSuccess extends SetNameState {}
 
 class SetNameBloc extends Bloc<SetNameEvent, SetNameState> {
   SetNameBloc({required UserApiService userApiService})
@@ -30,6 +45,7 @@ class SetNameBloc extends Bloc<SetNameEvent, SetNameState> {
             .switchMap(mapper);
       },
     );
+    on<FinishedRegistering>(_createUser);
   }
   final UserApiService _userApiService;
 
@@ -42,5 +58,30 @@ class SetNameBloc extends Bloc<SetNameEvent, SetNameState> {
       final isFree = result.data!;
       isFree ? emit(NameFree()) : emit(NameTaken());
     }
+  }
+
+  Future<void> _createUser(
+    FinishedRegistering event,
+    Emitter<SetNameState> emit,
+  ) async {
+    if (state is NameTaken) {
+      emit(
+        RegisterError(errorMessage: 'Chosen name is already taken'),
+      );
+      return;
+    } else if (event.newName.isEmpty) {
+      emit(
+        RegisterError(errorMessage: "Name can't be empty"),
+      );
+      return;
+    }
+    final result = await _userApiService.createUser(event.newName);
+    if (!result.isSuccess) {
+      emit(
+        RegisterError(errorMessage: result.errorMessage!),
+      );
+      return;
+    }
+    emit(RegisterSuccess());
   }
 }

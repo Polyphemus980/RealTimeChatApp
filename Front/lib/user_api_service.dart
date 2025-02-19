@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:chatapp_frontend/api_service.dart';
 import 'package:chatapp_frontend/core/result_type/result.dart';
+import 'package:chatapp_frontend/unit.dart';
 
 class UserApiService {
   UserApiService({required ApiService apiService}) : _apiService = apiService;
@@ -43,6 +46,20 @@ class UserApiService {
       return Result<bool>.success(isNew);
     } catch (err) {
       return Result<bool>.failure('Error processing response: $err');
+    }
+  }
+
+  Future<Result<Unit>> createUser(String displayName) async {
+    final result = await _apiService.post<Map<String, dynamic>>(
+      'auth/register',
+      data: jsonEncode(
+        {'displayName': displayName},
+      ),
+    );
+    if (!result.isSuccess) {
+      return Result<Unit>.failure(result.errorMessage!);
+    } else {
+      return Result<Unit>.success(Unit());
     }
   }
 

@@ -27,6 +27,8 @@ class EmailValidated extends AuthEvent {}
 
 class SignOut extends AuthEvent {}
 
+class RegistrationFinished extends AuthEvent {}
+
 class AuthStateChanged extends AuthEvent {
   AuthStateChanged({required this.user, required this.token});
   final User? user;
@@ -74,6 +76,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignUpWithEmail>(_signUpWithEmail);
     on<ResendVerificationEmail>(_resendVerificationEmail);
     on<SignInWithGoogle>(_signInWithGoogle);
+    on<RegistrationFinished>(_finishRegistration);
     on<SignOut>(_signOut);
   }
   final FirebaseAuth _authInstance;
@@ -180,6 +183,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
     emit(SignedOut());
+  }
+
+  void _finishRegistration(
+    RegistrationFinished event,
+    Emitter<AuthState> emit,
+  ) {
+    if (state is SignedInNeedData) {
+      final currentState = state as SignedInNeedData;
+      emit(
+        SignedIn(user: currentState.user, token: currentState.token),
+      );
+    }
   }
 
   @override
