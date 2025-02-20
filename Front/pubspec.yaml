@@ -44,6 +44,7 @@ dependencies:
   flutter_hooks: ^0.20.5
   dio: ^5.8.0+1
   get_it: ^8.0.3
+  signalr_core: ^1.1.1
 
 dev_dependencies:
   flutter_test:

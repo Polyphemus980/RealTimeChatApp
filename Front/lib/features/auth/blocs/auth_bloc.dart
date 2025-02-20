@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:chatapp_frontend/auth_token_service.dart';
+import 'package:chatapp_frontend/get_it_di.dart';
 import 'package:chatapp_frontend/user_api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -160,7 +162,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthStateChanged event,
     Emitter<AuthState> emit,
   ) async {
-    _userApiService.updateToken(event.token);
+    getIt.get<AuthTokenService>().updateToken(event.token);
     if (state is SignedIn && event.user != null) {
       return;
     }

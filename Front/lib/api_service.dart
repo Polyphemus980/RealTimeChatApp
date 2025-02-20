@@ -1,8 +1,9 @@
+import 'package:chatapp_frontend/auth_token_service.dart';
 import 'package:chatapp_frontend/core/result_type/result.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  ApiService() {
+  ApiService({required AuthTokenService tokenService}) {
     _dio = Dio(
       BaseOptions(
         baseUrl: 'http://10.0.2.2:5244/',
@@ -10,6 +11,7 @@ class ApiService {
         receiveTimeout: const Duration(seconds: 10),
       ),
     )..interceptors.add(_authInterceptor);
+    tokenService.tokenStream.listen(updateToken);
   }
 
   late final Dio _dio;
