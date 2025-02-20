@@ -106,7 +106,9 @@ public class ChatHub : Hub
             throw new HubException("Couldn't join the group " + result.ErrorMessage);
         }
 
-        await Clients.Group(GetGroupNameFromId(groupId)).SendAsync("JoinedGroupChat", userId);
+        await Clients
+            .Group(GetGroupNameFromId(groupId))
+            .SendAsync("JoinedGroupChat", userId, groupId);
         await Groups.AddToGroupAsync(Context.ConnectionId, GetGroupNameFromId(groupId));
     }
 
@@ -119,7 +121,9 @@ public class ChatHub : Hub
             throw new HubException("Couldn't leave the group " + result.ErrorMessage);
         }
 
-        await Clients.Group(GetGroupNameFromId(groupId)).SendAsync("LeftGroupChat", userId);
+        await Clients
+            .Group(GetGroupNameFromId(groupId))
+            .SendAsync("LeftGroupChat", userId, groupId);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, GetGroupNameFromId(groupId));
     }
 
@@ -132,7 +136,9 @@ public class ChatHub : Hub
             throw new HubException("Couldn't change the nickname " + result.ErrorMessage);
         }
 
-        await Clients.Group(GetGroupNameFromId(groupId)).SendAsync("ChangedNickname", userId);
+        await Clients
+            .Group(GetGroupNameFromId(groupId))
+            .SendAsync("ChangedNickname", userId, newNickname, groupId);
     }
 
     public override async Task OnConnectedAsync()
