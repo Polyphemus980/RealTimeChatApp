@@ -29,7 +29,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
-builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IGroupService, ConversationService>();
 builder.Services.AddTransient<IValidator<RegisterData>, UserValidator>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddAuthorization();

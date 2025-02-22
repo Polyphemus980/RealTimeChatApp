@@ -10,8 +10,8 @@ public class Message
     public User Sender { get; set; } = null!;
     public string SenderId { get; set; } = null!;
 
-    public Group? ReceiverGroup { get; set; }
-    public int? ReceiverGroupId { get; set; }
+    public Conversation Conversation { get; set; } = null!;
+    public int ConversationId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -21,5 +21,5 @@ public class Message
 
     public List<MessageReceivers> MessageStatuses { get; } = [];
 
-    public List<User> UserReceivers { get; } = [];
+    public List<User> Receivers { get; } = [];
 }

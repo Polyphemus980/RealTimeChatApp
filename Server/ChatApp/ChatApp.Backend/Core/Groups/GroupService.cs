@@ -1,40 +1,43 @@
 ﻿using ChatApp.Backend.Core.Common;
+using ChatApp.Backend.Core.Enums;
 using ChatApp.Backend.Domain;
 using ChatApp.Backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Backend.Core.Groups;
 
-public class GroupService : IGroupService
+public class ConversationService : IGroupService
 {
     private readonly ChatDbContext _dbContext;
 
-    public GroupService(ChatDbContext dbContext)
+    public ConversationService(ChatDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<Group>>> GetUserGroups(string userId)
+    public async Task<Result<List<Conversation>>> GetUserConversations(string userId)
     {
         try
         {
             var groups = await _dbContext
-                .GroupUsers.Where(g => g.UserId == userId)
-                .Select(g => g.Group)
+                .ConversationUsers.Where(g => g.UserId == userId)
+                .Select(g => g.Conversation)
                 .AsNoTracking()
                 .ToListAsync();
-            return Result<List<Group>>.Success(groups);
+            return Result<List<Conversation>>.Success(groups);
         }
         catch (Exception ex)
         {
-            return Result<List<Group>>.Failure(ex.Message);
+            return Result<List<Conversation>>.Failure(ex.Message);
         }
     }
 
     public async Task<Result<Unit>> AddUserToGroup(int groupId, string userId)
     {
-        var userAlreadyExists = await _dbContext.GroupUsers.AnyAsync(g =>
-            g.GroupId == groupId && g.UserId == userId
+        var userAlreadyExists = await _dbContext.ConversationUsers.AnyAsync(g =>
+            g.ConversationId == groupId
+            && g.UserId == userId
+            && g.Conversation.Type == ConversationType.Group
         );
 
         if (userAlreadyExists)
@@ -44,10 +47,10 @@ public class GroupService : IGroupService
 
         try
         {
-            await _dbContext.GroupUsers.AddAsync(
-                new GroupUsers
+            await _dbContext.ConversationUsers.AddAsync(
+                new ConversationUsers
                 {
-                    GroupId = groupId,
+                    ConversationId = groupId,
                     UserId = userId,
                     IsAdmin = false,
                 }
@@ -65,14 +68,16 @@ public class GroupService : IGroupService
     {
         try
         {
-            var groupUser = await _dbContext.GroupUsers.SingleOrDefaultAsync(g =>
-                g.UserId == userId && g.GroupId == groupId
+            var groupUser = await _dbContext.ConversationUsers.SingleOrDefaultAsync(g =>
+                g.UserId == userId
+                && g.ConversationId == groupId
+                && g.Conversation.Type == ConversationType.Group
             );
             if (groupUser == null)
             {
                 return Result<Unit>.Failure("No user with this ID belongs to this group");
             }
-            _dbContext.GroupUsers.Remove(groupUser);
+            _dbContext.ConversationUsers.Remove(groupUser);
             await _dbContext.SaveChangesAsync();
             return Result<Unit>.Success(Unit.Value);
         }
@@ -82,7 +87,11 @@ public class GroupService : IGroupService
         }
     }
 
-    public async Task<Result<Unit>> ChangeNickname(int groupId, string userId, string? newNickname)
+    public async Task<Result<Unit>> ChangeNickname(
+        int conversationId,
+        string userId,
+        string? newNickname
+    )
     {
         if (newNickname is "")
         {
@@ -90,14 +99,14 @@ public class GroupService : IGroupService
         }
         try
         {
-            var groupUser = await _dbContext.GroupUsers.SingleOrDefaultAsync(g =>
-                g.UserId == userId && g.GroupId == groupId
+            var conversationUser = await _dbContext.ConversationUsers.SingleOrDefaultAsync(g =>
+                g.UserId == userId && g.ConversationId == conversationId
             );
-            if (groupUser == null)
+            if (conversationUser == null)
             {
                 return Result<Unit>.Failure("No user with this ID belongs to this group");
             }
-            groupUser.Nickname = newNickname;
+            conversationUser.Nickname = newNickname;
             await _dbContext.SaveChangesAsync();
             return Result<Unit>.Success(Unit.Value);
         }

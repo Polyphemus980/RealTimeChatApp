@@ -10,5 +10,7 @@ public class MessageReceivers
     public string UserId { get; set; } = null!;
     public User User { get; set; } = null!;
 
+    public DateTime SentAt { get; set; }
+
     public MessageStatus Status { get; set; }
 }

@@ -18,9 +18,9 @@ public class User
 
     public List<Message> ReceivedMessages { get; } = [];
 
-    public List<GroupUsers> GroupUsers { get; } = [];
+    public List<ConversationUsers> UserConversations { get; } = [];
 
-    public List<Group> Groups { get; } = [];
+    public List<Conversation> Conversations { get; } = [];
 
     public List<MessageReceivers> MessageStatuses { get; } = [];
 }

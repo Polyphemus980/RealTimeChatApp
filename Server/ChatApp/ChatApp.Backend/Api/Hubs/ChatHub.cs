@@ -12,12 +12,12 @@ public class ChatHub : Hub
 {
     private readonly IConnectionManager _connectionManager;
     private readonly IMessageService _messageService;
-    private readonly GroupService _groupService;
+    private readonly ConversationService _groupService;
 
     public ChatHub(
         IConnectionManager connectionManager,
         IMessageService messageService,
-        GroupService groupService
+        ConversationService groupService
     )
     {
         _connectionManager = connectionManager;
@@ -25,22 +25,18 @@ public class ChatHub : Hub
         _groupService = groupService;
     }
 
-    public async Task SendMessage(string receiverId, string message)
+    public async Task SendMessage(int conversationId, string message)
     {
         var senderId = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var result = await _messageService.CreateMessageAsync(senderId, receiverId, message);
+        var result = await _messageService.CreateMessageAsync(senderId, conversationId, message);
         if (!result.IsSuccess)
         {
             throw new HubException("Couldn't send a message " + result.ErrorMessage);
         }
 
-        var receiverConnectionId = _connectionManager.GetConnectionId(receiverId);
-        if (receiverConnectionId != null)
-        {
-            await Clients
-                .Client(receiverConnectionId)
-                .SendAsync("ReceiveMessage", senderId, message);
-        }
+        await Clients
+            .Group(GetGroupNameFromId(conversationId))
+            .SendAsync("ReceiveMessage", senderId, message);
     }
 
     public async Task MarkAsDelivered(string senderId, int messageId)
@@ -77,24 +73,18 @@ public class ChatHub : Hub
         }
     }
 
-    public async Task StartedTyping(string receiverId)
+    public async Task StartedTyping(int conversationId)
     {
         var typerId = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var receiverConnectionId = _connectionManager.GetConnectionId(receiverId);
-        if (receiverConnectionId != null)
-        {
-            await Clients.Client(receiverConnectionId).SendAsync("StartedTyping", typerId);
-        }
+
+        await Clients.Group(GetGroupNameFromId(conversationId)).SendAsync("StartedTyping", typerId);
     }
 
-    public async Task StoppedTyping(string receiverId)
+    public async Task StoppedTyping(int conversationId)
     {
         var typerId = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var receiverConnectionId = _connectionManager.GetConnectionId(receiverId);
-        if (receiverConnectionId != null)
-        {
-            await Clients.Client(receiverConnectionId).SendAsync("StoppedTyping", typerId);
-        }
+
+        await Clients.Group(GetGroupNameFromId(conversationId)).SendAsync("StoppedTyping", typerId);
     }
 
     public async Task JoinGroupChat(int groupId)
@@ -127,25 +117,25 @@ public class ChatHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, GetGroupNameFromId(groupId));
     }
 
-    public async Task ChangeNickname(int groupId, string newNickname)
+    public async Task ChangeNickname(int conversationId, string newNickname)
     {
         var userId = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var result = await _groupService.ChangeNickname(groupId, userId, newNickname);
+        var result = await _groupService.ChangeNickname(conversationId, userId, newNickname);
         if (!result.IsSuccess)
         {
             throw new HubException("Couldn't change the nickname " + result.ErrorMessage);
         }
 
         await Clients
-            .Group(GetGroupNameFromId(groupId))
-            .SendAsync("ChangedNickname", userId, newNickname, groupId);
+            .Group(GetGroupNameFromId(conversationId))
+            .SendAsync("ChangedNickname", userId, newNickname, conversationId);
     }
 
     public override async Task OnConnectedAsync()
     {
         var userId = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         _connectionManager.AddConnection(userId, Context.ConnectionId);
-        var result = await _groupService.GetUserGroups(userId);
+        var result = await _groupService.GetUserConversations(userId);
         if (!result.IsSuccess)
         {
             throw new HubException(result.ErrorMessage);
@@ -162,7 +152,7 @@ public class ChatHub : Hub
 
         _connectionManager.RemoveConnection(userId);
 
-        var result = await _groupService.GetUserGroups(userId);
+        var result = await _groupService.GetUserConversations(userId);
         if (!result.IsSuccess)
         {
             throw new HubException(result.ErrorMessage);
@@ -176,8 +166,8 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    private string GetGroupNameFromId(int groupId)
+    private string GetGroupNameFromId(int conversationId)
     {
-        return $"group_{groupId}";
+        return $"group_{conversationId}";
     }
 }

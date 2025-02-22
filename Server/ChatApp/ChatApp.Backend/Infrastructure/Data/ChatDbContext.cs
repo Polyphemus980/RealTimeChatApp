@@ -7,8 +7,8 @@ public class ChatDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Message> Messages { get; set; }
-    public DbSet<Group> Groups { get; set; }
-    public DbSet<GroupUsers> GroupUsers { get; set; }
+    public DbSet<Conversation> Conversations { get; set; }
+    public DbSet<ConversationUsers> ConversationUsers { get; set; }
     public DbSet<MessageReceivers> MessageReceivers { get; set; }
 
     public ChatDbContext(DbContextOptions<ChatDbContext> options)
@@ -33,11 +33,11 @@ public class ChatDbContext : DbContext
 
         modelBuilder
             .Entity<User>()
-            .HasMany(u => u.Groups)
+            .HasMany(u => u.Conversations)
             .WithMany(g => g.Users)
-            .UsingEntity<GroupUsers>();
+            .UsingEntity<ConversationUsers>();
 
-        modelBuilder.Entity<GroupUsers>().Property(g => g.Nickname).HasMaxLength(25);
+        modelBuilder.Entity<ConversationUsers>().Property(g => g.Nickname).HasMaxLength(25);
 
         modelBuilder
             .Entity<Message>()
@@ -48,9 +48,9 @@ public class ChatDbContext : DbContext
 
         modelBuilder
             .Entity<Message>()
-            .HasOne(m => m.ReceiverGroup)
+            .HasOne(m => m.Conversation)
             .WithMany(g => g.Messages)
-            .HasForeignKey(m => m.ReceiverGroupId)
+            .HasForeignKey(m => m.ConversationId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
 
@@ -58,7 +58,7 @@ public class ChatDbContext : DbContext
 
         modelBuilder
             .Entity<Message>()
-            .HasMany(m => m.UserReceivers)
+            .HasMany(m => m.Receivers)
             .WithMany(u => u.ReceivedMessages)
             .UsingEntity<MessageReceivers>();
     }

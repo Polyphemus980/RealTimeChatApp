@@ -16,69 +16,66 @@ public class MessageService : IMessageService
         _dbContext = dbContext;
     }
 
+    // public async Task<Result<int>> CreateMessageAsync(
+    //     string senderId,
+    //     string receiverUserId,
+    //     string content
+    // )
+    // {
+    //     try
+    //     {
+    //         var message = new Message { SenderId = senderId, Content = content };
+    //         await _dbContext.Messages.AddAsync(message);
+    //         var messageReceiver = new MessageReceivers
+    //         {
+    //             MessageId = message.Id,
+    //             UserId = receiverUserId,
+    //             Status = MessageStatus.Read,
+    //         };
+    //         await _dbContext.MessageReceivers.AddAsync(messageReceiver);
+    //         await _dbContext.SaveChangesAsync();
+    //         return Result<int>.Success(message.Id);
+    //     }
+    //     catch (DbUpdateException ex)
+    //     {
+    //         return Result<int>.Failure(
+    //             "An error occurred while inserting the message: " + ex.Message
+    //         );
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return Result<int>.Failure("An unexpected error occurred: " + ex.Message);
+    //     }
+    // }
+
     public async Task<Result<int>> CreateMessageAsync(
         string senderId,
-        string receiverUserId,
+        int conversationId,
         string content
     )
     {
-        try
-        {
-            var message = new Message { SenderId = senderId, Content = content };
-            await _dbContext.Messages.AddAsync(message);
-            var messageReceiver = new MessageReceivers
-            {
-                MessageId = message.Id,
-                UserId = receiverUserId,
-                Status = MessageStatus.Read,
-            };
-            await _dbContext.MessageReceivers.AddAsync(messageReceiver);
-            await _dbContext.SaveChangesAsync();
-            return Result<int>.Success(message.Id);
-        }
-        catch (DbUpdateException ex)
-        {
-            return Result<int>.Failure(
-                "An error occurred while inserting the message: " + ex.Message
-            );
-        }
-        catch (Exception ex)
-        {
-            return Result<int>.Failure("An unexpected error occurred: " + ex.Message);
-        }
-    }
-
-    public async Task<Result<int>> CreateGroupMessageAsync(
-        string senderId,
-        int receiverGroupId,
-        string content
-    )
-    {
-        var receiverGroupUserIds = await _dbContext
-            .Groups.Where(g => g.Id == receiverGroupId)
-            .SelectMany(g => g.Users.Select(u => u.Id))
+        var conversationUserIds = await _dbContext
+            .ConversationUsers.Where(cu => cu.ConversationId == conversationId)
+            .Select(cu => cu.UserId)
             .AsNoTracking()
             .ToListAsync();
-        if (receiverGroupUserIds.IsNullOrEmpty())
+
+        if (conversationUserIds.IsNullOrEmpty())
         {
-            return Result<int>.Failure($"No group exists with id: {receiverGroupId}");
+            return Result<int>.Failure($"No conversation exists with id: {conversationId}");
         }
         try
         {
             var message = new Message { SenderId = senderId, Content = content };
             await _dbContext.Messages.AddAsync(message);
-            var userReceivers = new List<MessageReceivers>();
-            foreach (var userId in receiverGroupUserIds)
-            {
-                userReceivers.Add(
-                    new MessageReceivers
-                    {
-                        MessageId = message.Id,
-                        UserId = userId,
-                        Status = MessageStatus.Sent,
-                    }
-                );
-            }
+            var userReceivers = conversationUserIds
+                .Select(userId => new MessageReceivers
+                {
+                    MessageId = message.Id,
+                    UserId = userId,
+                    Status = MessageStatus.Sent,
+                })
+                .ToList();
 
             await _dbContext.MessageReceivers.AddRangeAsync(userReceivers);
             await _dbContext.SaveChangesAsync();
@@ -102,7 +99,9 @@ public class MessageService : IMessageService
 
         if (message == null)
         {
-            return Result<Unit>.Failure($"No message with id: {message}  found in database");
+            return Result<Unit>.Failure(
+                $"No message with id: {message} and receiver with id: {userReceiverId} found in database"
+            );
         }
 
         if (message.Status != MessageStatus.Sent)
@@ -131,8 +130,7 @@ public class MessageService : IMessageService
     public async Task<Result<List<int>>> UpdateReadMessages(string senderId, string userReceiverId)
     {
         var messageIds = await _dbContext
-            .MessageReceivers.Include(mr => mr.Message)
-            .Where(mr =>
+            .MessageReceivers.Where(mr =>
                 senderId == mr.Message.SenderId
                 && mr.UserId == userReceiverId
                 && mr.Status == MessageStatus.Delivered
