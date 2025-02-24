@@ -58,11 +58,17 @@ class HubService {
     }
     _connection!
       ..on('ReceiveMessage', (arguments) {
-        if (arguments != null && arguments.length == 2) {
+        if (arguments != null && arguments.length == 3) {
           final senderId = arguments[0] as String;
           final message = arguments[1] as String;
-          _eventStreamController
-              .add(ReceiveMessage(senderId: senderId, message: message));
+          final conversationId = arguments[2] as int;
+          _eventStreamController.add(
+            ReceiveMessage(
+              senderId: senderId,
+              message: message,
+              conversationId: conversationId,
+            ),
+          );
         }
       })
       ..on('ReceiverDelivered', (arguments) {

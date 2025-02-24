@@ -1,8 +1,13 @@
 abstract class ChatEvent {}
 
 class ReceiveMessage extends ChatEvent {
-  ReceiveMessage({required this.senderId, required this.message});
+  ReceiveMessage({
+    required this.senderId,
+    required this.message,
+    required this.conversationId,
+  });
   final String senderId;
+  final int conversationId;
   final String message;
 }
 
