@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using ChatApp.Backend.Core.Connection;
-using ChatApp.Backend.Core.Groups;
+using ChatApp.Backend.Core.Conversations;
 using ChatApp.Backend.Core.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -12,17 +12,17 @@ public class ChatHub : Hub
 {
     private readonly IConnectionManager _connectionManager;
     private readonly IMessageService _messageService;
-    private readonly ConversationService _groupService;
+    private readonly ConversationService _conversationService;
 
     public ChatHub(
         IConnectionManager connectionManager,
         IMessageService messageService,
-        ConversationService groupService
+        ConversationService conversationService
     )
     {
         _connectionManager = connectionManager;
         _messageService = messageService;
-        _groupService = groupService;
+        _conversationService = conversationService;
     }
 
     public async Task SendMessage(int conversationId, string message)
@@ -36,7 +36,7 @@ public class ChatHub : Hub
 
         await Clients
             .Group(GetGroupNameFromId(conversationId))
-            .SendAsync("ReceiveMessage", senderId, message);
+            .SendAsync("ReceiveMessage", senderId, message, conversationId);
     }
 
     public async Task MarkAsDelivered(string senderId, int messageId)
@@ -90,7 +90,7 @@ public class ChatHub : Hub
     public async Task JoinGroupChat(int groupId)
     {
         var userId = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var result = await _groupService.AddUserToGroup(groupId, userId);
+        var result = await _conversationService.AddUserToGroup(groupId, userId);
         if (!result.IsSuccess)
         {
             throw new HubException("Couldn't join the group " + result.ErrorMessage);
@@ -105,7 +105,7 @@ public class ChatHub : Hub
     public async Task LeaveGroupChat(int groupId)
     {
         var userId = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var result = await _groupService.RemoveUserFromGroup(groupId, userId);
+        var result = await _conversationService.RemoveUserFromGroup(groupId, userId);
         if (!result.IsSuccess)
         {
             throw new HubException("Couldn't leave the group " + result.ErrorMessage);
@@ -120,7 +120,7 @@ public class ChatHub : Hub
     public async Task ChangeNickname(int conversationId, string newNickname)
     {
         var userId = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var result = await _groupService.ChangeNickname(conversationId, userId, newNickname);
+        var result = await _conversationService.ChangeNickname(conversationId, userId, newNickname);
         if (!result.IsSuccess)
         {
             throw new HubException("Couldn't change the nickname " + result.ErrorMessage);
@@ -135,7 +135,7 @@ public class ChatHub : Hub
     {
         var userId = Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         _connectionManager.AddConnection(userId, Context.ConnectionId);
-        var result = await _groupService.GetUserConversations(userId);
+        var result = await _conversationService.GetUserConversations(userId);
         if (!result.IsSuccess)
         {
             throw new HubException(result.ErrorMessage);
@@ -152,7 +152,7 @@ public class ChatHub : Hub
 
         _connectionManager.RemoveConnection(userId);
 
-        var result = await _groupService.GetUserConversations(userId);
+        var result = await _conversationService.GetUserConversations(userId);
         if (!result.IsSuccess)
         {
             throw new HubException(result.ErrorMessage);

@@ -37,6 +37,7 @@ public class ChatDbContext : DbContext
             .WithMany(g => g.Users)
             .UsingEntity<ConversationUsers>();
 
+        modelBuilder.Entity<ConversationUsers>().HasKey(cu => new { cu.ConversationId, cu.UserId });
         modelBuilder.Entity<ConversationUsers>().Property(g => g.Nickname).HasMaxLength(25);
 
         modelBuilder

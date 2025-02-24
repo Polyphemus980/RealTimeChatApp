@@ -1,34 +1,77 @@
-﻿using ChatApp.Backend.Core.Common;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using ChatApp.Backend.Core.Common;
+using ChatApp.Backend.Core.Conversations.DTOs;
 using ChatApp.Backend.Core.Enums;
+using ChatApp.Backend.Core.Messages.DTOs;
+using ChatApp.Backend.Core.Users.DTOs;
 using ChatApp.Backend.Domain;
 using ChatApp.Backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatApp.Backend.Core.Groups;
+namespace ChatApp.Backend.Core.Conversations;
 
-public class ConversationService : IGroupService
+public class ConversationService : IConversationService
 {
     private readonly ChatDbContext _dbContext;
+    private readonly IMapper _mapper;
 
-    public ConversationService(ChatDbContext dbContext)
+    public ConversationService(ChatDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
+        _mapper = mapper;
     }
 
-    public async Task<Result<List<Conversation>>> GetUserConversations(string userId)
+    public async Task<Result<List<ConversationListDto>>> GetUserConversations(string userId)
     {
         try
         {
             var groups = await _dbContext
-                .ConversationUsers.Where(g => g.UserId == userId)
-                .Select(g => g.Conversation)
-                .AsNoTracking()
+                .Conversations.Where(c => c.Users.Any(u => u.Id == userId))
+                .Include(c => c.Users)
+                .Include(c => c.Messages.OrderByDescending(conv => conv.CreatedAt).Take(1))
+                .ProjectTo<ConversationListDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-            return Result<List<Conversation>>.Success(groups);
+            return Result<List<ConversationListDto>>.Success(groups);
         }
         catch (Exception ex)
         {
-            return Result<List<Conversation>>.Failure(ex.Message);
+            return Result<List<ConversationListDto>>.Failure(ex.Message);
+        }
+    }
+
+    public async Task<Result<SingleConversationDto>> GetConversation(int conversationId)
+    {
+        try
+        {
+            var conversation = await _dbContext
+                .Conversations.Where(c => c.Id == conversationId)
+                .Include(c => c.GroupUsers)
+                .ThenInclude(gu => gu.User)
+                .FirstOrDefaultAsync();
+
+            if (conversation == null)
+            {
+                return Result<SingleConversationDto>.Failure(
+                    $"No conversation with id {conversationId}"
+                );
+            }
+            var messages = await _dbContext
+                .Messages.Where(m => m.ConversationId == conversationId)
+                .OrderByDescending(m => m.CreatedAt)
+                .Take(50)
+                .Include(m => m.MessageStatuses)
+                .ToListAsync();
+
+            conversation.Messages = messages;
+
+            return Result<SingleConversationDto>.Success(
+                _mapper.Map<SingleConversationDto>(conversation)
+            );
+        }
+        catch (Exception ex)
+        {
+            return Result<SingleConversationDto>.Failure(ex.Message);
         }
     }
 
@@ -114,5 +157,15 @@ public class ConversationService : IGroupService
         {
             return Result<Unit>.Failure(ex.Message);
         }
+    }
+
+    public async Task<Result<bool>> CheckIfUserInConversation(int conversationId, string userId)
+    {
+        var isUserInConversation = await _dbContext.ConversationUsers.AnyAsync(cu =>
+            cu.ConversationId == conversationId && cu.UserId == userId
+        );
+        return isUserInConversation
+            ? Result<bool>.Success(isUserInConversation)
+            : Result<bool>.Failure("Cannot access conversations the user is not a part of");
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using ChatApp.Backend.Core.Common;
 using ChatApp.Backend.Core.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,7 @@ public class UserController : ControllerBase
     [HttpGet("check-new")]
     public async Task<IActionResult> CheckIfNewUser()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = HttpContext.GetAuthorizedUserId();
         var result = await _userService.IsNewUser(userId);
         return result.IsSuccess
             ? Ok(new { isNew = result.Data })

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using ChatApp.Backend.Core.Authentication;
+using ChatApp.Backend.Core.Common;
 using ChatApp.Backend.Core.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,8 +31,8 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+        var userId = HttpContext.GetAuthorizedUserId();
+        var email = HttpContext.GetAuthorizedUserEmail();
 
         var result = await _userService.CreateUserAsync(userId, email, form.DisplayName);
         return result.IsSuccess
