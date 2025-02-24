@@ -1,6 +1,6 @@
-import 'package:chatapp_frontend/api_service.dart';
-import 'package:chatapp_frontend/auth_token_service.dart';
-import 'package:chatapp_frontend/user_api_service.dart';
+import 'package:chatapp_frontend/core/api/api_service.dart';
+import 'package:chatapp_frontend/core/api/user_api_service.dart';
+import 'package:chatapp_frontend/core/auth/auth_token_service.dart';
 import 'package:get_it/get_it.dart';
 
 bool setUpEnded = false;

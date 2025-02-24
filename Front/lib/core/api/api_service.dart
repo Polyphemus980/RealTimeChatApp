@@ -1,5 +1,5 @@
-import 'package:chatapp_frontend/auth_token_service.dart';
-import 'package:chatapp_frontend/core/result_type/result.dart';
+import 'package:chatapp_frontend/core/auth/auth_token_service.dart';
+import 'package:chatapp_frontend/core/result/result.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {

@@ -1,4 +1,4 @@
-import 'package:chatapp_frontend/core/common_widgets/app_scaffold.dart';
+import 'package:chatapp_frontend/core/common/widgets/app_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';

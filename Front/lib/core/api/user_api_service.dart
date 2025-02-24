@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:chatapp_frontend/api_service.dart';
-import 'package:chatapp_frontend/core/result_type/result.dart';
-import 'package:chatapp_frontend/unit.dart';
+import 'package:chatapp_frontend/core/api/api_service.dart';
+import 'package:chatapp_frontend/core/result/result.dart';
+import 'package:chatapp_frontend/core/result/unit.dart';
 
 class UserApiService {
   UserApiService({required ApiService apiService}) : _apiService = apiService;

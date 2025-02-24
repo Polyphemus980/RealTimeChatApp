@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:chatapp_frontend/chat_event.dart';
+import 'package:chatapp_frontend/core/common/events/chat_event.dart';
 import 'package:signalr_core/signalr_core.dart';
 
-import 'auth_token_service.dart';
+import '../auth/auth_token_service.dart';
 
 class HubService {
   HubService({required AuthTokenService tokenService}) {

@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:chatapp_frontend/user_api_service.dart';
+import 'package:chatapp_frontend/core/api/user_api_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 sealed class SetNameEvent {}

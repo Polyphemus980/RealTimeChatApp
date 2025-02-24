@@ -1,13 +1,9 @@
-import 'package:chatapp_frontend/dto/messages/last_message_dto.dart';
-import 'package:chatapp_frontend/dto/users/user_dto.dart';
+import 'package:chatapp_frontend/core/enums/conversation_type.dart';
+import 'package:chatapp_frontend/data/dto/messages/last_message_dto.dart';
+import 'package:chatapp_frontend/data/dto/users/user_dto.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'conversation_list_dto.g.dart';
-
-enum ConversationType {
-  group,
-  direct,
-}
 
 @JsonSerializable()
 class ConversationListDto {

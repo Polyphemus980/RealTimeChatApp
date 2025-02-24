@@ -1,4 +1,4 @@
-import 'package:chatapp_frontend/dto/users/user_group_data_dto.dart';
+import 'package:chatapp_frontend/data/dto/users/user_group_data_dto.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user_dto.g.dart';

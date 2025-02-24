@@ -32,7 +32,9 @@ builder
     .Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter<MessageStatus>());
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter<MessageStatus>(JsonNamingPolicy.CamelCase)
+        );
         options.JsonSerializerOptions.Converters.Add(
             new JsonStringEnumConverter<ConversationType>(JsonNamingPolicy.CamelCase)
         );

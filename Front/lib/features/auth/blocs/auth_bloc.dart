@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:chatapp_frontend/auth_token_service.dart';
-import 'package:chatapp_frontend/get_it_di.dart';
-import 'package:chatapp_frontend/user_api_service.dart';
+import 'package:chatapp_frontend/core/api/user_api_service.dart';
+import 'package:chatapp_frontend/core/auth/auth_token_service.dart';
+import 'package:chatapp_frontend/core/dependency_injection/get_it_di.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
