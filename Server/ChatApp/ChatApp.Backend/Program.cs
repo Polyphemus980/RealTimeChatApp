@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using ChatApp.Backend.Api.Hubs;
 using ChatApp.Backend.Api.Middleware;
@@ -33,7 +34,7 @@ builder
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter<MessageStatus>());
         options.JsonSerializerOptions.Converters.Add(
-            new JsonNumberEnumConverter<ConversationType>()
+            new JsonStringEnumConverter<ConversationType>(JsonNamingPolicy.CamelCase)
         );
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
