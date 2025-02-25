@@ -1,4 +1,5 @@
 import 'package:chatapp_frontend/core/api/api_service.dart';
+import 'package:chatapp_frontend/core/api/conversation_api_service.dart';
 import 'package:chatapp_frontend/core/api/user_api_service.dart';
 import 'package:chatapp_frontend/core/auth/auth_token_service.dart';
 import 'package:get_it/get_it.dart';
@@ -18,6 +19,11 @@ void getItSetUp() {
       )
       ..registerSingleton(
         UserApiService(
+          apiService: getIt.get<ApiService>(),
+        ),
+      )
+      ..registerSingleton(
+        ConversationApiService(
           apiService: getIt.get<ApiService>(),
         ),
       );

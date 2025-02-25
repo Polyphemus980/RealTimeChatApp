@@ -11,13 +11,13 @@ class ConversationApiService {
   Future<Result<ConversationListDto>> getConversations() async {
     final result = await _apiService.get<Map<String, dynamic>>('conversations');
     if (!result.isSuccess) {
-      return Result.failure(result.errorMessage!);
+      return Result<ConversationListDto>.failure(result.errorMessage!);
     }
     try {
       final parsedConversationList = ConversationListDto.fromJson(result.data!);
-      return Result.success(parsedConversationList);
+      return Result<ConversationListDto>.success(parsedConversationList);
     } catch (err) {
-      return Result.failure(err.toString());
+      return Result<ConversationListDto>.failure(err.toString());
     }
   }
 
@@ -27,13 +27,13 @@ class ConversationApiService {
     final result = await _apiService
         .get<Map<String, dynamic>>('conversation/$conversationId');
     if (!result.isSuccess) {
-      return Result.failure(result.errorMessage!);
+      return Result<SingleConversationDto>.failure(result.errorMessage!);
     }
     try {
       final parsedConversation = SingleConversationDto.fromJson(result.data!);
-      return Result.success(parsedConversation);
+      return Result<SingleConversationDto>.success(parsedConversation);
     } catch (err) {
-      return Result.failure(err.toString());
+      return Result<SingleConversationDto>.failure(err.toString());
     }
   }
 }

@@ -11,7 +11,7 @@ class ConversationListDto {
     required this.id,
     required this.type,
     required this.members,
-    required this.lastMessage,
+    required this.lastMessages,
   });
 
   factory ConversationListDto.fromJson(Map<String, dynamic> json) =>
@@ -22,5 +22,5 @@ class ConversationListDto {
   final int id;
   final ConversationType type;
   final List<UserDto> members;
-  final List<LastMessageDto> lastMessage;
+  final List<LastMessageDto> lastMessages;
 }
