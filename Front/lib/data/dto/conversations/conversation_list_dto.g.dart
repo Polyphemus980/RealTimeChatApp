@@ -15,9 +15,10 @@ ConversationListDto _$ConversationListDtoFromJson(Map<String, dynamic> json) =>
           .toList(),
       currentUser:
           UserDto.fromJson(json['currentUser'] as Map<String, dynamic>),
-      lastMessage: (json['lastMessage'] as List<dynamic>)
-          .map((e) => LastMessageDto.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      lastMessage: json['lastMessage'] == null
+          ? null
+          : LastMessageDto.fromJson(
+              json['lastMessage'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ConversationListDtoToJson(

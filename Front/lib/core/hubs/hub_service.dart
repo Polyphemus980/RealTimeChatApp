@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:chatapp_frontend/core/common/events/chat_event.dart';
+import 'package:chatapp_frontend/core/result/result.dart';
+import 'package:chatapp_frontend/core/result/unit.dart';
 import 'package:signalr_core/signalr_core.dart';
 
 import '../auth/auth_token_service.dart';
@@ -130,6 +132,82 @@ class HubService {
           );
         }
       });
+  }
+
+  Future<Result<Unit>> sendMessage(int conversationId, String content) async {
+    try {
+      await _connection?.invoke('sendMessage', args: [conversationId, content]);
+      return Result<Unit>.success(Unit());
+    } catch (err) {
+      return Result<Unit>.failure(err.toString());
+    }
+  }
+
+  Future<Result<Unit>> markAsDelivered(String senderId, int messageId) async {
+    try {
+      await _connection?.invoke('MarkAsDelivered', args: [senderId, messageId]);
+      return Result<Unit>.success(Unit());
+    } catch (err) {
+      return Result<Unit>.failure(err.toString());
+    }
+  }
+
+  Future<Result<Unit>> markAsRead(String senderId) async {
+    try {
+      await _connection?.invoke('MarkAsRead', args: [senderId]);
+      return Result<Unit>.success(Unit());
+    } catch (err) {
+      return Result<Unit>.failure(err.toString());
+    }
+  }
+
+  Future<Result<Unit>> startedTyping(int conversationId) async {
+    try {
+      await _connection?.invoke('StartedTyping', args: [conversationId]);
+      return Result<Unit>.success(Unit());
+    } catch (err) {
+      return Result<Unit>.failure(err.toString());
+    }
+  }
+
+  Future<Result<Unit>> stoppedTyping(int conversationId) async {
+    try {
+      await _connection?.invoke('StoppedTyping', args: [conversationId]);
+      return Result<Unit>.success(Unit());
+    } catch (err) {
+      return Result<Unit>.failure(err.toString());
+    }
+  }
+
+  Future<Result<Unit>> joinGroupChat(int groupId) async {
+    try {
+      await _connection?.invoke('JoinGroupChat', args: [groupId]);
+      return Result<Unit>.success(Unit());
+    } catch (err) {
+      return Result<Unit>.failure(err.toString());
+    }
+  }
+
+  Future<Result<Unit>> leaveGroupChat(int groupId) async {
+    try {
+      await _connection?.invoke('LeaveGroupChat', args: [groupId]);
+      return Result<Unit>.success(Unit());
+    } catch (err) {
+      return Result<Unit>.failure(err.toString());
+    }
+  }
+
+  Future<Result<Unit>> changeNickname(
+    int conversationId,
+    String newNickname,
+  ) async {
+    try {
+      await _connection
+          ?.invoke('ChangeNickname', args: [conversationId, newNickname]);
+      return Result<Unit>.success(Unit());
+    } catch (err) {
+      return Result<Unit>.failure(err.toString());
+    }
   }
 
   Future<void> _disconnect() async {

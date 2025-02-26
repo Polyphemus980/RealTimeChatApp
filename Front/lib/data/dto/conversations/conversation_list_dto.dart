@@ -24,5 +24,5 @@ class ConversationListDto {
   final ConversationType type;
   final List<UserDto> members;
   final UserDto currentUser;
-  final List<LastMessageDto> lastMessage;
+  final LastMessageDto? lastMessage;
 }

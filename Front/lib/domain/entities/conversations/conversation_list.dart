@@ -18,21 +18,23 @@ class ConversationList {
         type: dto.type,
         members: dto.members.map(ChatUser.fromDto).toList(),
         currentUser: ChatUser.fromDto(dto.currentUser),
-        lastMessage: dto.lastMessage.map(LastMessage.fromDto).toList(),
+        lastMessage: dto.lastMessage == null
+            ? LastMessage.fromDto(dto.lastMessage!)
+            : null,
       );
 
   final int id;
   final ConversationType type;
   final List<ChatUser> members;
   final ChatUser currentUser;
-  final List<LastMessage> lastMessage;
+  final LastMessage? lastMessage;
 
   ConversationList copyWith({
     int? id,
     ConversationType? type,
     List<ChatUser>? members,
     ChatUser? currentUser,
-    List<LastMessage>? lastMessage,
+    LastMessage? lastMessage,
   }) {
     return ConversationList(
       id: id ?? this.id,

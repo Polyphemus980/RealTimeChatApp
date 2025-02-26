@@ -57,7 +57,12 @@ class ConversationsScreen extends StatelessWidget {
                   final conversation = state.conversationList[index];
                   return ListTile(
                     leading: const CircleAvatar(),
-                    title: Text('${conversation.members[0]}'),
+                    title: Text(conversation.currentUser.displayName),
+                    subtitle: Text(
+                      conversation.lastMessage == null
+                          ? conversation.lastMessage!.content
+                          : 'No messages yet',
+                    ),
                   );
                 },
               );
