@@ -19,9 +19,26 @@ class ConversationMessage {
         senderId: dto.senderId,
         sentAt: dto.sentAt,
       );
+
   final int id;
   final List<MessageReceiver> receivers;
   final String content;
   final String senderId;
   final DateTime sentAt;
+
+  ConversationMessage copyWith({
+    int? id,
+    List<MessageReceiver>? receivers,
+    String? content,
+    String? senderId,
+    DateTime? sentAt,
+  }) {
+    return ConversationMessage(
+      id: id ?? this.id,
+      receivers: receivers ?? this.receivers,
+      content: content ?? this.content,
+      senderId: senderId ?? this.senderId,
+      sentAt: sentAt ?? this.sentAt,
+    );
+  }
 }

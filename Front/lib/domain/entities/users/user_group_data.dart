@@ -5,6 +5,17 @@ class UserGroupData {
 
   factory UserGroupData.fromDto(UserGroupDataDto dto) =>
       UserGroupData(nickname: dto.nickname, isAdmin: dto.isAdmin);
+
   final String? nickname;
   final bool isAdmin;
+
+  UserGroupData copyWith({
+    String? nickname,
+    bool? isAdmin,
+  }) {
+    return UserGroupData(
+      nickname: nickname ?? this.nickname,
+      isAdmin: isAdmin ?? this.isAdmin,
+    );
+  }
 }

@@ -8,5 +8,6 @@ public record SingleConversationDto(
     int Id,
     ConversationType Type,
     List<UserDto> Members,
+    UserDto CurrentUser,
     List<ConversationMessageDto> Messages
 );

@@ -41,7 +41,7 @@ public class ConversationController : ControllerBase
             return Unauthorized(canAccessConversationResult.ErrorMessage);
         }
 
-        var result = await _conversationService.GetConversation(id);
+        var result = await _conversationService.GetConversation(id, userId);
         return result.IsSuccess
             ? Ok(result.Data)
             : StatusCode(result.StatusCode, new { error = result.ErrorMessage });

@@ -9,5 +9,6 @@ public record ConversationListDto(
     int Id,
     ConversationType Type,
     List<UserDto> Members,
+    UserDto CurrentUser,
     LastMessageDto? LastMessage
 );

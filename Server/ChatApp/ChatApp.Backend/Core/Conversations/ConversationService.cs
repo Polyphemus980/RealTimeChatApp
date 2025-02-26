@@ -14,25 +14,41 @@ namespace ChatApp.Backend.Core.Conversations;
 public class ConversationService : IConversationService
 {
     private readonly ChatDbContext _dbContext;
-    private readonly IMapper _mapper;
 
     public ConversationService(ChatDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
-        _mapper = mapper;
     }
 
     public async Task<Result<List<ConversationListDto>>> GetUserConversations(string userId)
     {
         try
         {
-            var groups = await _dbContext
+            var conversations = await _dbContext
                 .Conversations.Where(c => c.Users.Any(u => u.Id == userId))
                 .Include(c => c.Users)
-                .Include(c => c.Messages.OrderByDescending(conv => conv.CreatedAt).Take(1))
-                .ProjectTo<ConversationListDto>(_mapper.ConfigurationProvider)
+                .Include(c => c.Messages.OrderByDescending(conv => conv.CreatedAt))
+                .Select(
+                    (c) =>
+                        new ConversationListDto(
+                            c.Id,
+                            c.Type,
+                            c.Users.Where(u => u.Id != userId)
+                                .Select(u => new UserDto(u.Id, u.DisplayName, null))
+                                .ToList(),
+                            c.Users.Select(u => new UserDto(u.Id, u.DisplayName, null))
+                                .Single(u => u.UserId == userId),
+                            c.Messages.Select(m => new LastMessageDto(
+                                    m.Id,
+                                    m.Content,
+                                    m.CreatedAt,
+                                    m.SenderId
+                                ))
+                                .FirstOrDefault()
+                        )
+                )
                 .ToListAsync();
-            return Result<List<ConversationListDto>>.Success(groups);
+            return Result<List<ConversationListDto>>.Success(conversations);
         }
         catch (Exception ex)
         {
@@ -40,34 +56,65 @@ public class ConversationService : IConversationService
         }
     }
 
-    public async Task<Result<SingleConversationDto>> GetConversation(int conversationId)
+    public async Task<Result<SingleConversationDto>> GetConversation(
+        int conversationId,
+        string userId
+    )
     {
         try
         {
+            // var conversation = await _dbContext
+            //     .Conversations.Where(c => c.Id == conversationId)
+            //     .Include(c => c.GroupUsers)
+            //     .ThenInclude(gu => gu.User)
+            //     .FirstOrDefaultAsync();
+            //
+            // if (conversation == null)
+            // {
+            //     return Result<SingleConversationDto>.Failure(
+            //         $"No conversation with id {conversationId}"
+            //     );
+            // }
+            // var messages = await _dbContext
+            //     .Messages.Where(m => m.ConversationId == conversationId)
+            //     .OrderByDescending(m => m.CreatedAt)
+            //     .Take(50)
+            //     .Include(m => m.MessageStatuses)
+            //     .ToListAsync();
             var conversation = await _dbContext
                 .Conversations.Where(c => c.Id == conversationId)
-                .Include(c => c.GroupUsers)
-                .ThenInclude(gu => gu.User)
-                .FirstOrDefaultAsync();
-
+                .Select(c => new SingleConversationDto(
+                    c.Id,
+                    c.Type,
+                    c.Users.Where(u => u.Id != userId)
+                        .Select(u => new UserDto(u.Id, u.DisplayName, null))
+                        .ToList(),
+                    c.Users.Where(u => u.Id == userId)
+                        .Select(u => new UserDto(u.Id, u.DisplayName, null))
+                        .First(),
+                    c.Messages.OrderByDescending(m => m.CreatedAt)
+                        .Take(50)
+                        .Select(m => new ConversationMessageDto(
+                            m.Id,
+                            m.MessageStatuses.Select(mr => new MessageReceiverDTO(
+                                    mr.UserId,
+                                    mr.Status
+                                ))
+                                .ToList(),
+                            m.Content,
+                            m.SenderId,
+                            m.CreatedAt
+                        ))
+                        .ToList()
+                ))
+                .SingleOrDefaultAsync();
             if (conversation == null)
             {
                 return Result<SingleConversationDto>.Failure(
-                    $"No conversation with id {conversationId}"
+                    $"No conversation with id: {conversationId} exists"
                 );
             }
-            var messages = await _dbContext
-                .Messages.Where(m => m.ConversationId == conversationId)
-                .OrderByDescending(m => m.CreatedAt)
-                .Take(50)
-                .Include(m => m.MessageStatuses)
-                .ToListAsync();
-
-            conversation.Messages = messages;
-
-            return Result<SingleConversationDto>.Success(
-                _mapper.Map<SingleConversationDto>(conversation)
-            );
+            return Result<SingleConversationDto>.Success(conversation);
         }
         catch (Exception ex)
         {

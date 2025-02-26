@@ -14,8 +14,23 @@ class LastMessage {
         sentAt: dto.sentAt,
         senderName: dto.senderName,
       );
+
   final int id;
   final String content;
   final DateTime sentAt;
   final String senderName;
+
+  LastMessage copyWith({
+    int? id,
+    String? content,
+    DateTime? sentAt,
+    String? senderName,
+  }) {
+    return LastMessage(
+      id: id ?? this.id,
+      content: content ?? this.content,
+      sentAt: sentAt ?? this.sentAt,
+      senderName: senderName ?? this.senderName,
+    );
+  }
 }

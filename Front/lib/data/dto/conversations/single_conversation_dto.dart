@@ -12,6 +12,7 @@ class SingleConversationDto {
     required this.id,
     required this.type,
     required this.members,
+    required this.currentUser,
     required this.messages,
   });
 
@@ -23,5 +24,6 @@ class SingleConversationDto {
   final int id;
   final ConversationType type;
   final List<UserDto> members;
+  final UserDto currentUser;
   final List<ConversationMessageDto> messages;
 }

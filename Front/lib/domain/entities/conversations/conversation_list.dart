@@ -9,18 +9,37 @@ class ConversationList {
     required this.id,
     required this.type,
     required this.members,
-    required this.lastMessages,
+    required this.currentUser,
+    required this.lastMessage,
   });
 
   factory ConversationList.fromDto(ConversationListDto dto) => ConversationList(
         id: dto.id,
         type: dto.type,
         members: dto.members.map(ChatUser.fromDto).toList(),
-        lastMessages: dto.lastMessages.map(LastMessage.fromDto).toList(),
+        currentUser: ChatUser.fromDto(dto.currentUser),
+        lastMessage: dto.lastMessage.map(LastMessage.fromDto).toList(),
       );
 
   final int id;
   final ConversationType type;
   final List<ChatUser> members;
-  final List<LastMessage> lastMessages;
+  final ChatUser currentUser;
+  final List<LastMessage> lastMessage;
+
+  ConversationList copyWith({
+    int? id,
+    ConversationType? type,
+    List<ChatUser>? members,
+    ChatUser? currentUser,
+    List<LastMessage>? lastMessage,
+  }) {
+    return ConversationList(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      members: members ?? this.members,
+      currentUser: currentUser ?? this.currentUser,
+      lastMessage: lastMessage ?? this.lastMessage,
+    );
+  }
 }

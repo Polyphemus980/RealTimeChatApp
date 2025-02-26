@@ -8,7 +8,7 @@ public interface IConversationService
 {
     public Task<Result<List<ConversationListDto>>> GetUserConversations(string userId);
 
-    public Task<Result<SingleConversationDto>> GetConversation(int conversationId);
+    public Task<Result<SingleConversationDto>> GetConversation(int conversationId, string userId);
     public Task<Result<Unit>> AddUserToGroup(int groupId, string userId);
     public Task<Result<Unit>> RemoveUserFromGroup(int groupId, string userId);
 

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:chatapp_frontend/core/api/conversation_api_service.dart';
 import 'package:chatapp_frontend/core/common/events/chat_event.dart';
 import 'package:chatapp_frontend/core/hubs/hub_service.dart';
-import 'package:chatapp_frontend/data/dto/conversations/conversation_list_dto.dart';
+import 'package:chatapp_frontend/domain/entities/conversations/conversation_list.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 sealed class ConversationListEvent {}
@@ -42,7 +42,7 @@ class LoadingData extends ConversationListState {}
 class Loaded extends ConversationListState {
   Loaded({required this.conversationList});
 
-  final ConversationListDto conversationList;
+  final List<ConversationList> conversationList;
 }
 
 class Error extends ConversationListState {

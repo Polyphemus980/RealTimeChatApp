@@ -9,4 +9,14 @@ class MessageReceiver {
 
   final String userId;
   final MessageStatus status;
+
+  MessageReceiver copyWith({
+    String? userId,
+    MessageStatus? status,
+  }) {
+    return MessageReceiver(
+      userId: userId ?? this.userId,
+      status: status ?? this.status,
+    );
+  }
 }

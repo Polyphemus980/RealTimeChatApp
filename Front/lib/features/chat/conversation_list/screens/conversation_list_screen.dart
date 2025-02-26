@@ -16,13 +16,13 @@ class ConversationListScreen extends StatelessWidget {
         hubService: getIt.get<HubService>(),
         conversationApiService: getIt.get<ConversationApiService>(),
       ),
-      child: const ConversationList(),
+      child: const ConversationsScreen(),
     );
   }
 }
 
-class ConversationList extends StatelessWidget {
-  const ConversationList({super.key});
+class ConversationsScreen extends StatelessWidget {
+  const ConversationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,38 @@ class ConversationList extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
         child: BlocBuilder<ConversationListBloc, ConversationListState>(
           builder: (context, state) {
-            return const Scaffold();
+            if (state is LoadingData) {
+              return const CircularProgressIndicator();
+            } else if (state is Error) {
+              return Center(
+                child: Column(
+                  children: [
+                    Text('An error occurred : ${state.errorMessage}'),
+                    ElevatedButton(
+                      onPressed: () {
+                        context
+                            .read<ConversationListBloc>()
+                            .add(InitializeConversations());
+                      },
+                      child: const Text('Try again'),
+                    ),
+                  ],
+                ),
+              );
+            } else if (state is Loaded) {
+              return ListView.builder(
+                itemCount: state.conversationList.length,
+                itemBuilder: (context, index) {
+                  final conversation = state.conversationList[index];
+                  return ListTile(
+                    leading: const CircleAvatar(),
+                    title: Text('${conversation.members[0]}'),
+                  );
+                },
+              );
+            } else {
+              throw Exception("shouldn't be here");
+            }
           },
         ),
       ),

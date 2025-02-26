@@ -16,7 +16,20 @@ class ChatUser {
             ? null
             : UserGroupData.fromDto(dto.groupData!),
       );
+
   final String id;
   final String displayName;
   final UserGroupData? groupData;
+
+  ChatUser copyWith({
+    String? id,
+    String? displayName,
+    UserGroupData? groupData,
+  }) {
+    return ChatUser(
+      id: id ?? this.id,
+      displayName: displayName ?? this.displayName,
+      groupData: groupData ?? this.groupData,
+    );
+  }
 }

@@ -13,7 +13,9 @@ ConversationListDto _$ConversationListDtoFromJson(Map<String, dynamic> json) =>
       members: (json['members'] as List<dynamic>)
           .map((e) => UserDto.fromJson(e as Map<String, dynamic>))
           .toList(),
-      lastMessages: (json['lastMessages'] as List<dynamic>)
+      currentUser:
+          UserDto.fromJson(json['currentUser'] as Map<String, dynamic>),
+      lastMessage: (json['lastMessage'] as List<dynamic>)
           .map((e) => LastMessageDto.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
@@ -24,7 +26,8 @@ Map<String, dynamic> _$ConversationListDtoToJson(
       'id': instance.id,
       'type': _$ConversationTypeEnumMap[instance.type]!,
       'members': instance.members,
-      'lastMessages': instance.lastMessages,
+      'currentUser': instance.currentUser,
+      'lastMessage': instance.lastMessage,
     };
 
 const _$ConversationTypeEnumMap = {

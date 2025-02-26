@@ -4,7 +4,6 @@ using ChatApp.Backend.Api.Hubs;
 using ChatApp.Backend.Api.Middleware;
 using ChatApp.Backend.Core.Authentication;
 using ChatApp.Backend.Core.Conversations;
-using ChatApp.Backend.Core.Conversations.DTOs;
 using ChatApp.Backend.Core.Enums;
 using ChatApp.Backend.Core.Messages;
 using ChatApp.Backend.Core.Users;
@@ -13,7 +12,6 @@ using FirebaseAdmin;
 using FluentValidation;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,7 +48,6 @@ builder.Services.AddTransient<IValidator<RegisterData>, UserValidator>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddAuthorization();
 builder.Services.AddSignalR();
-builder.Services.AddAutoMapper(typeof(ConversationProfile));
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
