@@ -5,6 +5,7 @@ import 'package:chatapp_frontend/core/hubs/hub_service.dart';
 import 'package:chatapp_frontend/features/chat/conversation_list/blocs/conversation_list_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class ConversationListScreen extends StatelessWidget {
   const ConversationListScreen({super.key});
@@ -55,14 +56,23 @@ class ConversationsScreen extends StatelessWidget {
                 itemCount: state.conversationList.length,
                 itemBuilder: (context, index) {
                   final conversation = state.conversationList[index];
+                  final lastMessage = conversation.lastMessage;
                   return ListTile(
                     leading: const CircleAvatar(),
                     title: Text(conversation.currentUser.displayName),
                     subtitle: Text(
-                      conversation.lastMessage == null
-                          ? conversation.lastMessage!.content
+                      lastMessage != null
+                          ? lastMessage.content
                           : 'No messages yet',
                     ),
+                    trailing: lastMessage != null
+                        ? Text(
+                            conversation.lastMessage!.sentAt.toIso8601String(),
+                          )
+                        : null,
+                    onTap: () {
+                      context.go('conversations/${conversation.id}');
+                    },
                   );
                 },
               );

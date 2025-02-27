@@ -5,10 +5,12 @@ class ReceiveMessage extends ChatEvent {
     required this.senderId,
     required this.message,
     required this.conversationId,
+    required this.sentAt,
   });
   final String senderId;
   final int conversationId;
   final String message;
+  final DateTime sentAt;
 }
 
 class ReceiverDelivered extends ChatEvent {

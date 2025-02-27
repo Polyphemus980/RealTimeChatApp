@@ -64,11 +64,13 @@ class HubService {
           final senderId = arguments[0] as String;
           final message = arguments[1] as String;
           final conversationId = arguments[2] as int;
+          final sentAt = arguments[3] as DateTime;
           _eventStreamController.add(
             ReceiveMessage(
               senderId: senderId,
               message: message,
               conversationId: conversationId,
+              sentAt: sentAt,
             ),
           );
         }

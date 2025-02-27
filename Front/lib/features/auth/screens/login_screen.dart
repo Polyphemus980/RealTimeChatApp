@@ -13,7 +13,7 @@ class LoginScreen extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is SignedIn) {
-          context.go('/signout');
+          context.go('/conversations');
         } else if (state is SignedInNeedData) {
           context.go('/data');
         } else if (state is AuthError) {

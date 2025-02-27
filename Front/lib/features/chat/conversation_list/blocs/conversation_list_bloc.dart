@@ -4,6 +4,7 @@ import 'package:chatapp_frontend/core/api/conversation_api_service.dart';
 import 'package:chatapp_frontend/core/common/events/chat_event.dart';
 import 'package:chatapp_frontend/core/hubs/hub_service.dart';
 import 'package:chatapp_frontend/domain/entities/conversations/conversation_list.dart';
+import 'package:chatapp_frontend/domain/entities/messages/last_message.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 sealed class ConversationListEvent {}
@@ -15,24 +16,12 @@ class ReceivedMessage extends ConversationListEvent {
     required this.senderId,
     required this.message,
     required this.conversationId,
+    required this.sentAt,
   });
   final String senderId;
   final int conversationId;
   final String message;
-}
-
-class JoinedGroup extends ConversationListEvent {
-  JoinedGroup({required this.joiningUserId, required this.groupId});
-
-  final String joiningUserId;
-  final int groupId;
-}
-
-class LeftGroup extends ConversationListEvent {
-  LeftGroup({required this.leavingUserId, required this.groupId});
-
-  final String leavingUserId;
-  final int groupId;
+  final DateTime sentAt;
 }
 
 sealed class ConversationListState {}
@@ -61,10 +50,42 @@ class ConversationListBloc
         super(LoadingData()) {
     _handleEventStream();
     on<InitializeConversations>(_initializeConversations);
+    on<ReceivedMessage>(_receiveMessage);
   }
   final HubService _hubService;
   final ConversationApiService _conversationApiService;
   StreamSubscription<ChatEvent>? _chatEventSubscription;
+
+  Future<void> _receiveMessage(
+    ReceivedMessage event,
+    Emitter<ConversationListState> emit,
+  ) async {
+    if (state is! Loaded) {
+      return;
+    }
+    final loadedState = state as Loaded;
+
+    final modifiedConversation = loadedState.conversationList
+        .firstWhere((c) => c.id == event.conversationId);
+
+    modifiedConversation.copyWith(
+      lastMessage: LastMessage(
+        content: event.message,
+        sentAt: event.sentAt,
+        senderName: modifiedConversation.members
+            .where((m) => m.id == event.senderId)
+            .first
+            .displayName,
+      ),
+    );
+
+    final newConversations = [
+      modifiedConversation,
+      ...loadedState.conversationList
+          .where((c) => c.id != event.conversationId),
+    ];
+    emit(Loaded(conversationList: newConversations));
+  }
 
   void _handleEventStream() {
     _chatEventSubscription = _hubService.eventStream.listen(
@@ -75,20 +96,7 @@ class ConversationListBloc
               senderId: event.senderId,
               message: event.message,
               conversationId: event.conversationId,
-            ),
-          );
-        } else if (event is JoinedGroupChat) {
-          add(
-            JoinedGroup(
-              joiningUserId: event.userId,
-              groupId: event.groupId,
-            ),
-          );
-        } else if (event is LeftGroupChat) {
-          add(
-            LeftGroup(
-              leavingUserId: event.userId,
-              groupId: event.groupId,
+              sentAt: event.sentAt,
             ),
           );
         }
